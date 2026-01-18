@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://sachinchiplunkar.com/</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://sachinchiplunkar.com/assets/sachin.png</image:loc>
+      <image:title>Sachin Chiplunkar - Bio-Operational Transformation Expert</image:title>
+      <image:caption>Sachin Chiplunkar helps manufacturing executives achieve 10x operational performance</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://sachinchiplunkar.com/assets/og-image.png</image:loc>
+      <image:title>Sachin Chiplunkar Bio-Operational Transformation</image:title>
+    </image:image>
+  </url>
+
+  <!-- Hero Section -->
+  <url>
+    <loc>https://sachinchiplunkar.com/#hero</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- About Section -->
+  <url>
+    <loc>https://sachinchiplunkar.com/#about</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Method Section - Three Pillars -->
+  <url>
+    <loc>https://sachinchiplunkar.com/#method</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Process Section - 90-Day Transformation -->
+  <url>
+    <loc>https://sachinchiplunkar.com/#process</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- FAQ Section -->
+  <url>
+    <loc>https://sachinchiplunkar.com/#faq</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Qualification Section -->
+  <url>
+    <loc>https://sachinchiplunkar.com/#qualification</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Assessment/CTA Section -->
+  <url>
+    <loc>https://sachinchiplunkar.com/#assessment</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+</urlset>
