@@ -143,12 +143,6 @@ export const Assessment: React.FC = () => {
                     ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}
                   `}
                 >
-                  {/* Scarcity notice */}
-                  <div className="mb-6 px-4 py-2 rounded-lg bg-alert/10 border border-alert/20">
-                    <p className="text-sm text-alert font-medium">
-                      Limited spots available each month
-                    </p>
-                  </div>
 
                   {/* Primary CTA Button */}
                   <a

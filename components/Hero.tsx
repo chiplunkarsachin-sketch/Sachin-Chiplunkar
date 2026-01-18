@@ -184,15 +184,6 @@ export const Hero: React.FC = () => {
             >
               {/* Primary CTA */}
               <div className="relative group">
-                {/* Scarcity badge */}
-                <span 
-                  className="absolute -top-3 -right-3 z-10
-                    px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase
-                    badge-alert rounded-lg
-                    shadow-lg shadow-alert/30"
-                >
-                  3 Spots Left
-                </span>
 
                 <a
                   href="#assessment"

@@ -87,7 +87,7 @@ export const Qualification: React.FC = () => {
               ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
             `}
           >
-            I work with a limited number of clients at a time to ensure 
+            I prioritize quality partnerships to deliver 
             deep engagement and real results. Here's how to know if we're a fit.
           </p>
         </div>
