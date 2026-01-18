@@ -27,7 +27,7 @@ interface ScrambleTextProps {
   className?: string;
   duration?: number;
   onComplete?: () => void;
-  start?: boolean;
+  isActive?: boolean;
 }
 
 const ScrambleText: React.FC<ScrambleTextProps> = ({
@@ -35,45 +35,35 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({
   className = '',
   duration = 1500,
   onComplete,
-  start = false,
+  isActive = false,
 }) => {
-  // Start with scrambled text
-  const [displayText, setDisplayText] = useState(() => getScrambledText(text));
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [displayText, setDisplayText] = useState(text);
   const intervalRef = useRef<number | null>(null);
-  const hasStartedRef = useRef(false);
+  const isRunningRef = useRef(false);
 
   useEffect(() => {
-    // Keep scrambling while waiting
-    if (!start && !hasCompleted) {
-      const scrambleInterval = window.setInterval(() => {
-        setDisplayText(getScrambledText(text));
-      }, 50);
-      return () => window.clearInterval(scrambleInterval);
+    // Clear any existing interval
+    if (intervalRef.current) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  }, [start, hasCompleted, text]);
 
-  useEffect(() => {
-    // Only run reveal animation once when start becomes true
-    if (start && !hasStartedRef.current && !hasCompleted) {
-      hasStartedRef.current = true;
+    if (isActive && !isRunningRef.current) {
+      isRunningRef.current = true;
 
       const textLength = text.length;
       let iteration = 0;
       const totalIterations = textLength * 3;
       const intervalTime = duration / totalIterations;
 
-      // Clear any existing interval
-      if (intervalRef.current) {
-        window.clearInterval(intervalRef.current);
-      }
+      // Start with scrambled
+      setDisplayText(getScrambledText(text));
 
       intervalRef.current = window.setInterval(() => {
         const newText = text
           .split('')
           .map((char, index) => {
             if (char === ' ') return ' ';
-            // Reveal characters progressively from left to right
             if (index < Math.floor(iteration / 3)) {
               return text[index];
             }
@@ -87,30 +77,35 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({
         if (iteration >= totalIterations) {
           if (intervalRef.current) {
             window.clearInterval(intervalRef.current);
+            intervalRef.current = null;
           }
           setDisplayText(text);
-          setHasCompleted(true);
+          isRunningRef.current = false;
           if (onComplete) {
             onComplete();
           }
         }
       }, intervalTime);
+    } else if (!isActive) {
+      // Reset when not active
+      isRunningRef.current = false;
+      setDisplayText(text);
     }
 
     return () => {
       if (intervalRef.current) {
         window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [start, hasCompleted, text, duration, onComplete]);
+  }, [isActive, text, duration, onComplete]);
 
   return <span className={className}>{displayText}</span>;
 };
 
 export const Hero: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [startFirstScramble, setStartFirstScramble] = useState(false);
-  const [startSecondScramble, setStartSecondScramble] = useState(false);
+  const [activeWord, setActiveWord] = useState<0 | 1 | 2>(0); // 0 = none, 1 = first word, 2 = second word
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -119,20 +114,28 @@ export const Hero: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Start first scramble after headline fades in
+  // Start the continuous loop after page loads
   useEffect(() => {
     if (isLoaded) {
       const timer = setTimeout(() => {
-        setStartFirstScramble(true);
+        setActiveWord(1); // Start with first word
       }, 800);
       return () => clearTimeout(timer);
     }
   }, [isLoaded]);
 
-  const handleFirstScrambleComplete = () => {
+  const handleFirstComplete = () => {
+    // Wait a moment, then start second word
     setTimeout(() => {
-      setStartSecondScramble(true);
-    }, 200);
+      setActiveWord(2);
+    }, 500);
+  };
+
+  const handleSecondComplete = () => {
+    // Wait a moment, then restart with first word (loop)
+    setTimeout(() => {
+      setActiveWord(1);
+    }, 1500);
   };
 
   return (
@@ -268,16 +271,17 @@ export const Hero: React.FC = () => {
               <ScrambleText
                 text="Wasting Money"
                 className="text-alert"
-                start={startFirstScramble}
+                isActive={activeWord === 1}
                 duration={1200}
-                onComplete={handleFirstScrambleComplete}
+                onComplete={handleFirstComplete}
               />
               <span className="text-white"> on Transformations That </span>
               <ScrambleText
                 text="Don't Stick"
                 className="text-gradient-animated"
-                start={startSecondScramble}
+                isActive={activeWord === 2}
                 duration={1000}
+                onComplete={handleSecondComplete}
               />
             </h1>
 
