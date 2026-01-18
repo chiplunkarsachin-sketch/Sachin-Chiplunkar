@@ -44,9 +44,14 @@ export const Footer: React.FC = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <a href="#" className="inline-block mb-4">
-              <span className="font-display text-2xl font-bold text-white">
+            <a href="#" className="inline-flex flex-col gap-1 mb-4 group">
+              <span className="font-display text-2xl font-bold text-white
+                group-hover:text-gradient transition-all duration-300">
                 Sachin Chiplunkar
+              </span>
+              <span className="text-[10px] font-medium text-text-tertiary tracking-[0.15em] uppercase
+                group-hover:text-text-secondary transition-colors">
+                Operations × Biology × AI
               </span>
             </a>
             <p className="text-text-secondary mb-6 max-w-md">
