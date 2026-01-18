@@ -187,7 +187,7 @@ export const Hero: React.FC = () => {
 
                 <a
                   href="#assessment"
-                  className="btn-primary text-lg px-8 py-4
+                  className="btn-primary text-lg px-8 py-4 text-background
                     group-hover:shadow-xl group-hover:shadow-white/10"
                 >
                   See Why Transformations Fail

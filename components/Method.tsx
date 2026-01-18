@@ -267,7 +267,7 @@ export const Method: React.FC = () => {
             
             <a
               href="#process"
-              className="btn-primary shrink-0"
+              className="btn-primary shrink-0 text-background"
             >
               See the Process
               <ArrowRight className="w-4 h-4" />
