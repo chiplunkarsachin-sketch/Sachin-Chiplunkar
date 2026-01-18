@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 // Trust indicators data
@@ -8,8 +8,91 @@ const trustIndicators = [
   '20+ Years Operations',
 ];
 
+// Characters used for scramble effect
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
+
+interface ScrambleTextProps {
+  text: string;
+  className?: string;
+  delay?: number;
+  duration?: number;
+  onComplete?: () => void;
+  trigger?: boolean;
+}
+
+const ScrambleText: React.FC<ScrambleTextProps> = ({
+  text,
+  className = '',
+  delay = 0,
+  duration = 1500,
+  onComplete,
+  trigger = true,
+}) => {
+  const [displayText, setDisplayText] = useState(text);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const scramble = useCallback(() => {
+    if (!trigger) return;
+
+    setIsAnimating(true);
+    const originalText = text;
+    const textLength = originalText.length;
+    let iteration = 0;
+    const totalIterations = textLength * 3; // How many scramble cycles before settling
+    const intervalTime = duration / totalIterations;
+
+    // Clear any existing intervals
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(() => {
+      setDisplayText(
+        originalText
+          .split('')
+          .map((char, index) => {
+            // Keep spaces as spaces
+            if (char === ' ') return ' ';
+
+            // Characters that have been "solved"
+            if (index < iteration / 3) {
+              return originalText[index];
+            }
+
+            // Random character for unsolved positions
+            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+          })
+          .join('')
+      );
+
+      iteration++;
+
+      if (iteration >= totalIterations) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        setDisplayText(originalText);
+        setIsAnimating(false);
+        onComplete?.();
+      }
+    }, intervalTime);
+  }, [text, duration, onComplete, trigger]);
+
+  useEffect(() => {
+    if (trigger && !isAnimating) {
+      timeoutRef.current = setTimeout(scramble, delay);
+    }
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [trigger, delay, scramble, isAnimating]);
+
+  return <span className={className}>{displayText}</span>;
+};
+
 export const Hero: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [scramblePhase, setScramblePhase] = useState(0); // 0: waiting, 1: first word, 2: second word
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -17,6 +100,19 @@ export const Hero: React.FC = () => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  // Start scramble effect after headline fades in
+  useEffect(() => {
+    if (isLoaded) {
+      const timer = setTimeout(() => setScramblePhase(1), 800); // Start after fade-in
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded]);
+
+  const handleFirstScrambleComplete = () => {
+    // Start second scramble after first completes
+    setTimeout(() => setScramblePhase(2), 200);
+  };
 
   return (
     <section
@@ -28,20 +124,20 @@ export const Hero: React.FC = () => {
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Gradient orb behind photo */}
-        <div 
-          className="absolute top-1/4 left-1/4 w-[600px] h-[600px] 
+        <div
+          className="absolute top-1/4 left-1/4 w-[600px] h-[600px]
             bg-primary/5 rounded-full blur-[120px]
             animate-pulse-slow"
         />
         {/* Secondary accent glow */}
-        <div 
-          className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] 
+        <div
+          className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px]
             bg-accent/5 rounded-full blur-[100px]
             animate-pulse-slow"
           style={{ animationDelay: '2s' }}
         />
         {/* Grid pattern */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `
@@ -56,33 +152,33 @@ export const Hero: React.FC = () => {
       {/* Main Content */}
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          
+
           {/* Left Column - Photo */}
-          <div 
+          <div
             className={`
               order-2 lg:order-1 flex justify-center lg:justify-start
               transition-all duration-1000 ease-out
-              ${isLoaded 
-                ? 'opacity-100 translate-x-0' 
+              ${isLoaded
+                ? 'opacity-100 translate-x-0'
                 : 'opacity-0 -translate-x-10'
               }
             `}
           >
             <div className="relative group">
               {/* Photo Container */}
-              <div 
-                className="relative w-[320px] sm:w-[400px] lg:w-[480px] 
+              <div
+                className="relative w-[320px] sm:w-[400px] lg:w-[480px]
                   aspect-[3/4] rounded-2xl overflow-hidden
                   shadow-2xl shadow-black/50"
               >
                 {/* Gradient overlay for depth */}
-                <div 
+                <div
                   className="absolute inset-0 z-10 pointer-events-none
                     bg-gradient-to-t from-background/40 via-transparent to-transparent"
                 />
-                
+
                 {/* Cyan tint overlay */}
-                <div 
+                <div
                   className="absolute inset-0 z-10 pointer-events-none
                     bg-primary/5 mix-blend-color"
                 />
@@ -99,7 +195,7 @@ export const Hero: React.FC = () => {
                 />
 
                 {/* Border glow on hover */}
-                <div 
+                <div
                   className="absolute inset-0 rounded-2xl z-20
                     border border-white/5 group-hover:border-primary/20
                     transition-colors duration-500"
@@ -107,9 +203,9 @@ export const Hero: React.FC = () => {
               </div>
 
               {/* Floating accent elements */}
-              <div 
-                className="absolute -bottom-4 -right-4 w-24 h-24 
-                  bg-gradient-to-br from-primary/20 to-accent/20 
+              <div
+                className="absolute -bottom-4 -right-4 w-24 h-24
+                  bg-gradient-to-br from-primary/20 to-accent/20
                   rounded-full blur-xl opacity-60
                   group-hover:opacity-80 transition-opacity duration-500"
               />
@@ -119,12 +215,12 @@ export const Hero: React.FC = () => {
           {/* Right Column - Content */}
           <div className="order-1 lg:order-2 flex flex-col">
             {/* Badge */}
-            <div 
+            <div
               className={`
                 inline-flex self-start mb-6
                 transition-all duration-700 delay-200
-                ${isLoaded 
-                  ? 'opacity-100 translate-y-0' 
+                ${isLoaded
+                  ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-4'
                 }
               `}
@@ -135,49 +231,60 @@ export const Hero: React.FC = () => {
             </div>
 
             {/* Headline */}
-            <h1 
+            <h1
               className={`
-                font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl 
+                font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl
                 font-extrabold leading-[1.05] tracking-tight
                 mb-6
                 transition-all duration-700 delay-300
-                ${isLoaded 
-                  ? 'opacity-100 translate-y-0' 
+                ${isLoaded
+                  ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-6'
                 }
               `}
             >
               <span className="text-white">Stop </span>
-              <span className="text-alert">Wasting Money</span>
+              <ScrambleText
+                text="Wasting Money"
+                className="text-alert"
+                trigger={scramblePhase >= 1}
+                duration={1200}
+                onComplete={handleFirstScrambleComplete}
+              />
               <span className="text-white"> on Transformations That </span>
-              <span className="text-gradient-animated">Don't Stick</span>
+              <ScrambleText
+                text="Don't Stick"
+                className="text-gradient-animated"
+                trigger={scramblePhase >= 2}
+                duration={1000}
+              />
             </h1>
 
             {/* Subheadline */}
-            <p 
+            <p
               className={`
                 text-lg sm:text-xl text-text-secondary leading-relaxed
                 max-w-xl mb-8
                 transition-all duration-700 delay-400
-                ${isLoaded 
-                  ? 'opacity-100 translate-y-0' 
+                ${isLoaded
+                  ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-6'
                 }
               `}
             >
               I help manufacturing executives achieve{' '}
               <strong className="text-white font-semibold">10× operational performance</strong>{' '}
-              by fixing the three reasons most initiatives fail: broken processes, 
+              by fixing the three reasons most initiatives fail: broken processes,
               burned-out leaders, and disconnected AI systems.
             </p>
 
             {/* CTA Container */}
-            <div 
+            <div
               className={`
                 flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-10
                 transition-all duration-700 delay-500
-                ${isLoaded 
-                  ? 'opacity-100 translate-y-0 scale-100' 
+                ${isLoaded
+                  ? 'opacity-100 translate-y-0 scale-100'
                   : 'opacity-0 translate-y-6 scale-95'
                 }
               `}
@@ -191,7 +298,7 @@ export const Hero: React.FC = () => {
                     group-hover:shadow-xl group-hover:shadow-white/10"
                 >
                   See Why Transformations Fail
-                  <ArrowRight className="w-5 h-5 transition-transform duration-300 
+                  <ArrowRight className="w-5 h-5 transition-transform duration-300
                     group-hover:translate-x-1" />
                 </a>
               </div>
@@ -206,18 +313,18 @@ export const Hero: React.FC = () => {
             </div>
 
             {/* Trust Indicators */}
-            <div 
+            <div
               className={`
                 flex flex-wrap items-center gap-x-6 gap-y-2
                 transition-all duration-700 delay-600
-                ${isLoaded 
-                  ? 'opacity-100 translate-y-0' 
+                ${isLoaded
+                  ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-4'
                 }
               `}
             >
               {trustIndicators.map((item, index) => (
-                <div 
+                <div
                   key={item}
                   className="flex items-center gap-2 text-sm text-text-secondary"
                   style={{ transitionDelay: `${600 + index * 100}ms` }}
@@ -232,13 +339,13 @@ export const Hero: React.FC = () => {
       </div>
 
       {/* Scroll Indicator */}
-      <div 
+      <div
         className={`
           absolute bottom-8 left-1/2 -translate-x-1/2
           flex flex-col items-center gap-2
           transition-all duration-700 delay-[800ms]
-          ${isLoaded 
-            ? 'opacity-60 translate-y-0' 
+          ${isLoaded
+            ? 'opacity-60 translate-y-0'
             : 'opacity-0 translate-y-4'
           }
         `}
