@@ -78,4 +78,20 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://sachinchiplunkar.com/privacy</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Terms of Service -->
+  <url>
+    <loc>https://sachinchiplunkar.com/terms</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
 </urlset>

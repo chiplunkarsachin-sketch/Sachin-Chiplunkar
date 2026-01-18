@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "nginx -g 'daemon off;'"
+
+[staticAssets]
+root = "dist"
+
+# Use custom nginx config for SPA routing
+[phases.setup.aptPkgs]
+pkgs = ["nginx"]
