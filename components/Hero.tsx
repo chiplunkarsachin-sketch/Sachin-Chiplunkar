@@ -8,104 +8,8 @@ const trustIndicators = [
   '20+ Years Operations',
 ];
 
-// Characters used for scramble effect
-const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
-
-// Generate random scrambled text
-const getScrambledText = (text: string): string => {
-  return text
-    .split('')
-    .map((char) => {
-      if (char === ' ') return ' ';
-      return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
-    })
-    .join('');
-};
-
-interface ScrambleTextProps {
-  text: string;
-  className?: string;
-  duration?: number;
-  onComplete?: () => void;
-  isActive?: boolean;
-}
-
-const ScrambleText: React.FC<ScrambleTextProps> = ({
-  text,
-  className = '',
-  duration = 1500,
-  onComplete,
-  isActive = false,
-}) => {
-  const [displayText, setDisplayText] = useState(text);
-  const intervalRef = useRef<number | null>(null);
-  const isRunningRef = useRef(false);
-
-  useEffect(() => {
-    // Clear any existing interval
-    if (intervalRef.current) {
-      window.clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    if (isActive && !isRunningRef.current) {
-      isRunningRef.current = true;
-
-      const textLength = text.length;
-      let iteration = 0;
-      const totalIterations = textLength * 3;
-      const intervalTime = duration / totalIterations;
-
-      // Start with scrambled
-      setDisplayText(getScrambledText(text));
-
-      intervalRef.current = window.setInterval(() => {
-        const newText = text
-          .split('')
-          .map((char, index) => {
-            if (char === ' ') return ' ';
-            if (index < Math.floor(iteration / 3)) {
-              return text[index];
-            }
-            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
-          })
-          .join('');
-
-        setDisplayText(newText);
-        iteration++;
-
-        if (iteration >= totalIterations) {
-          if (intervalRef.current) {
-            window.clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          setDisplayText(text);
-          isRunningRef.current = false;
-          if (onComplete) {
-            onComplete();
-          }
-        }
-      }, intervalTime);
-    } else if (!isActive) {
-      // Reset when not active
-      isRunningRef.current = false;
-      setDisplayText(text);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        window.clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [isActive, text, duration, onComplete]);
-
-  return <span className={className}>{displayText}</span>;
-};
-
 export const Hero: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [activeWord, setActiveWord] = useState<0 | 1 | 2>(0); // 0 = none, 1 = first word, 2 = second word
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -113,30 +17,6 @@ export const Hero: React.FC = () => {
     const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
-
-  // Start the continuous loop after page loads
-  useEffect(() => {
-    if (isLoaded) {
-      const timer = setTimeout(() => {
-        setActiveWord(1); // Start with first word
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded]);
-
-  const handleFirstComplete = () => {
-    // Wait a moment, then start second word
-    setTimeout(() => {
-      setActiveWord(2);
-    }, 500);
-  };
-
-  const handleSecondComplete = () => {
-    // Wait a moment, then restart with first word (loop)
-    setTimeout(() => {
-      setActiveWord(1);
-    }, 1500);
-  };
 
   return (
     <section
@@ -268,21 +148,9 @@ export const Hero: React.FC = () => {
               `}
             >
               <span className="text-white">Stop </span>
-              <ScrambleText
-                text="Wasting Money"
-                className="text-alert"
-                isActive={activeWord === 1}
-                duration={1200}
-                onComplete={handleFirstComplete}
-              />
+              <span className="text-alert animate-glow-pulse">Wasting Money</span>
               <span className="text-white"> on Transformations That </span>
-              <ScrambleText
-                text="Don't Stick"
-                className="text-gradient-animated"
-                isActive={activeWord === 2}
-                duration={1000}
-                onComplete={handleSecondComplete}
-              />
+              <span className="text-gradient-animated animate-glow-pulse-delayed">Don't Stick</span>
             </h1>
 
             {/* Subheadline */}
