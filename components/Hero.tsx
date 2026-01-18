@@ -11,6 +11,17 @@ const trustIndicators = [
 // Characters used for scramble effect
 const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
 
+// Generate random scrambled text
+const getScrambledText = (text: string): string => {
+  return text
+    .split('')
+    .map((char) => {
+      if (char === ' ') return ' ';
+      return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+    })
+    .join('');
+};
+
 interface ScrambleTextProps {
   text: string;
   className?: string;
@@ -26,20 +37,26 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({
   onComplete,
   start = false,
 }) => {
-  const [displayText, setDisplayText] = useState('');
-  const [hasStarted, setHasStarted] = useState(false);
+  // Start with scrambled text
+  const [displayText, setDisplayText] = useState(() => getScrambledText(text));
+  const [hasCompleted, setHasCompleted] = useState(false);
   const intervalRef = useRef<number | null>(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    // Show original text initially if not started
-    if (!start && !hasStarted) {
-      setDisplayText(text);
-      return;
+    // Keep scrambling while waiting
+    if (!start && !hasCompleted) {
+      const scrambleInterval = window.setInterval(() => {
+        setDisplayText(getScrambledText(text));
+      }, 50);
+      return () => window.clearInterval(scrambleInterval);
     }
+  }, [start, hasCompleted, text]);
 
-    // Only run once when start becomes true
-    if (start && !hasStarted) {
-      setHasStarted(true);
+  useEffect(() => {
+    // Only run reveal animation once when start becomes true
+    if (start && !hasStartedRef.current && !hasCompleted) {
+      hasStartedRef.current = true;
 
       const textLength = text.length;
       let iteration = 0;
@@ -56,6 +73,7 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({
           .split('')
           .map((char, index) => {
             if (char === ' ') return ' ';
+            // Reveal characters progressively from left to right
             if (index < Math.floor(iteration / 3)) {
               return text[index];
             }
@@ -71,6 +89,7 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({
             window.clearInterval(intervalRef.current);
           }
           setDisplayText(text);
+          setHasCompleted(true);
           if (onComplete) {
             onComplete();
           }
@@ -83,7 +102,7 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({
         window.clearInterval(intervalRef.current);
       }
     };
-  }, [start, hasStarted, text, duration, onComplete]);
+  }, [start, hasCompleted, text, duration, onComplete]);
 
   return <span className={className}>{displayText}</span>;
 };
@@ -105,7 +124,7 @@ export const Hero: React.FC = () => {
     if (isLoaded) {
       const timer = setTimeout(() => {
         setStartFirstScramble(true);
-      }, 1000);
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, [isLoaded]);
@@ -113,7 +132,7 @@ export const Hero: React.FC = () => {
   const handleFirstScrambleComplete = () => {
     setTimeout(() => {
       setStartSecondScramble(true);
-    }, 300);
+    }, 200);
   };
 
   return (
