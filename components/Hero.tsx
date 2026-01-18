@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 // Trust indicators data
@@ -14,104 +14,106 @@ const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
 interface ScrambleTextProps {
   text: string;
   className?: string;
-  delay?: number;
   duration?: number;
   onComplete?: () => void;
-  trigger?: boolean;
+  start?: boolean;
 }
 
 const ScrambleText: React.FC<ScrambleTextProps> = ({
   text,
   className = '',
-  delay = 0,
   duration = 1500,
   onComplete,
-  trigger = true,
+  start = false,
 }) => {
-  const [displayText, setDisplayText] = useState(text);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const scramble = useCallback(() => {
-    if (!trigger) return;
-
-    setIsAnimating(true);
-    const originalText = text;
-    const textLength = originalText.length;
-    let iteration = 0;
-    const totalIterations = textLength * 3; // How many scramble cycles before settling
-    const intervalTime = duration / totalIterations;
-
-    // Clear any existing intervals
-    if (intervalRef.current) clearInterval(intervalRef.current);
-
-    intervalRef.current = setInterval(() => {
-      setDisplayText(
-        originalText
-          .split('')
-          .map((char, index) => {
-            // Keep spaces as spaces
-            if (char === ' ') return ' ';
-
-            // Characters that have been "solved"
-            if (index < iteration / 3) {
-              return originalText[index];
-            }
-
-            // Random character for unsolved positions
-            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
-          })
-          .join('')
-      );
-
-      iteration++;
-
-      if (iteration >= totalIterations) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setDisplayText(originalText);
-        setIsAnimating(false);
-        onComplete?.();
-      }
-    }, intervalTime);
-  }, [text, duration, onComplete, trigger]);
+  const [displayText, setDisplayText] = useState('');
+  const [hasStarted, setHasStarted] = useState(false);
+  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (trigger && !isAnimating) {
-      timeoutRef.current = setTimeout(scramble, delay);
+    // Show original text initially if not started
+    if (!start && !hasStarted) {
+      setDisplayText(text);
+      return;
+    }
+
+    // Only run once when start becomes true
+    if (start && !hasStarted) {
+      setHasStarted(true);
+
+      const textLength = text.length;
+      let iteration = 0;
+      const totalIterations = textLength * 3;
+      const intervalTime = duration / totalIterations;
+
+      // Clear any existing interval
+      if (intervalRef.current) {
+        window.clearInterval(intervalRef.current);
+      }
+
+      intervalRef.current = window.setInterval(() => {
+        const newText = text
+          .split('')
+          .map((char, index) => {
+            if (char === ' ') return ' ';
+            if (index < Math.floor(iteration / 3)) {
+              return text[index];
+            }
+            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+          })
+          .join('');
+
+        setDisplayText(newText);
+        iteration++;
+
+        if (iteration >= totalIterations) {
+          if (intervalRef.current) {
+            window.clearInterval(intervalRef.current);
+          }
+          setDisplayText(text);
+          if (onComplete) {
+            onComplete();
+          }
+        }
+      }, intervalTime);
     }
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (intervalRef.current) {
+        window.clearInterval(intervalRef.current);
+      }
     };
-  }, [trigger, delay, scramble, isAnimating]);
+  }, [start, hasStarted, text, duration, onComplete]);
 
   return <span className={className}>{displayText}</span>;
 };
 
 export const Hero: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [scramblePhase, setScramblePhase] = useState(0); // 0: waiting, 1: first word, 2: second word
+  const [startFirstScramble, setStartFirstScramble] = useState(false);
+  const [startSecondScramble, setStartSecondScramble] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    // Trigger animations after mount
+    // Trigger initial load animation
     const timer = setTimeout(() => setIsLoaded(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // Start scramble effect after headline fades in
+  // Start first scramble after headline fades in
   useEffect(() => {
     if (isLoaded) {
-      const timer = setTimeout(() => setScramblePhase(1), 800); // Start after fade-in
+      const timer = setTimeout(() => {
+        setStartFirstScramble(true);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, [isLoaded]);
 
   const handleFirstScrambleComplete = () => {
-    // Start second scramble after first completes
-    setTimeout(() => setScramblePhase(2), 200);
+    setTimeout(() => {
+      setStartSecondScramble(true);
+    }, 300);
   };
 
   return (
@@ -247,7 +249,7 @@ export const Hero: React.FC = () => {
               <ScrambleText
                 text="Wasting Money"
                 className="text-alert"
-                trigger={scramblePhase >= 1}
+                start={startFirstScramble}
                 duration={1200}
                 onComplete={handleFirstScrambleComplete}
               />
@@ -255,7 +257,7 @@ export const Hero: React.FC = () => {
               <ScrambleText
                 text="Don't Stick"
                 className="text-gradient-animated"
-                trigger={scramblePhase >= 2}
+                start={startSecondScramble}
                 duration={1000}
               />
             </h1>
