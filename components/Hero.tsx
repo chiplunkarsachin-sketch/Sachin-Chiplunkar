@@ -100,7 +100,14 @@ const ScrambleText: React.FC<ScrambleTextProps> = ({
     };
   }, [isActive, text, duration, onComplete]);
 
-  return <span className={className}>{displayText}</span>;
+  return (
+    <span className={`${className} relative inline-block`}>
+      {/* Invisible original text to maintain width */}
+      <span className="invisible">{text}</span>
+      {/* Visible scrambled text positioned on top */}
+      <span className="absolute left-0 top-0">{displayText}</span>
+    </span>
+  );
 };
 
 export const Hero: React.FC = () => {
