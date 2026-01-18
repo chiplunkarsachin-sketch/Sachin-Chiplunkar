@@ -3,9 +3,8 @@
    Premium Personal Branding Website
    ============================================ */
 
-/* Base Layer */
-@layer base {
-  *,
+/* Base Styles */
+*,
   *::before,
   *::after {
     box-sizing: border-box;
@@ -41,17 +40,15 @@
     outline-offset: 2px;
   }
 
-  /* Smooth image loading */
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
+/* Smooth image loading */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* Typography */
-@layer typography {
-  h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
     letter-spacing: -0.02em;
     line-height: 1.1;
@@ -75,15 +72,13 @@
     letter-spacing: -0.01em;
   }
 
-  .text-balance {
-    text-wrap: balance;
-  }
+.text-balance {
+  text-wrap: balance;
 }
 
 /* Premium Components */
-@layer components {
-  /* Glass Panel Effect */
-  .glass-panel {
+/* Glass Panel Effect */
+.glass-panel {
     background: linear-gradient(
       180deg,
       rgba(255, 255, 255, 0.04) 0%,
@@ -219,17 +214,15 @@
     color: #00E5FF;
   }
 
-  .badge-alert {
-    background: linear-gradient(135deg, #FF6B35 0%, #FF8A5B 100%);
-    border: none;
-    color: #FFFFFF;
-    animation: pulse-badge 2s ease-in-out infinite;
-  }
+.badge-alert {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8A5B 100%);
+  border: none;
+  color: #FFFFFF;
+  animation: pulse-badge 2s ease-in-out infinite;
 }
 
 /* Animations */
-@layer utilities {
-  @keyframes gradientFlow {
+@keyframes gradientFlow {
     0% { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
   }
@@ -327,15 +320,14 @@
   .animate-delay-500 { animation-delay: 500ms; }
   .animate-delay-600 { animation-delay: 600ms; }
 
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
